@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   authors: [{ name: "Muhamad Alfabel" }],
   creator: "Muhamad Alfabel",
   publisher: "Muhamad Alfabel",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { InteractiveHoverButton } from '@/component/ui/interactive-hover-button';
+import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { InteractiveHoverButton } from "@/component/ui/interactive-hover-button";
 
-type Intensity = 'subtle' | 'medium' | 'strong';
+type Intensity = "subtle" | "medium" | "strong";
 
 interface BeamsProps {
   className?: string;
@@ -45,7 +45,7 @@ function createBeam(w: number, h: number): Beam {
   };
 }
 
-function BeamsBackground({ className, intensity = 'strong' }: BeamsProps) {
+function BeamsBackground({ className, intensity = "strong" }: BeamsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const beamsRef = useRef<Beam[]>([]);
   const rafRef = useRef<number | null>(null);
@@ -59,12 +59,12 @@ function BeamsBackground({ className, intensity = 'strong' }: BeamsProps) {
 
   useEffect(() => {
     const prefersReduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const setup = () => {
@@ -103,7 +103,8 @@ function BeamsBackground({ className, intensity = 'strong' }: BeamsProps) {
       ctx.translate(b.x, b.y);
       ctx.rotate((b.angle * Math.PI) / 180);
 
-      const alpha = b.opacity * (0.85 + Math.sin(b.pulse) * 0.15) * opacityMap[intensity];
+      const alpha =
+        b.opacity * (0.85 + Math.sin(b.pulse) * 0.15) * opacityMap[intensity];
       const g = ctx.createLinearGradient(0, 0, 0, b.length);
       g.addColorStop(0, `hsla(${b.hue},85%,65%,0)`);
       g.addColorStop(0.12, `hsla(${b.hue},85%,65%,${alpha * 0.5})`);
@@ -127,7 +128,7 @@ function BeamsBackground({ className, intensity = 'strong' }: BeamsProps) {
       const h = canvas.height / dpr;
 
       ctx.clearRect(0, 0, w, h);
-      ctx.filter = 'blur(18px)';
+      ctx.filter = "blur(18px)";
 
       const total = beamsRef.current.length;
       for (let i = 0; i < total; i++) {
@@ -158,9 +159,9 @@ function BeamsBackground({ className, intensity = 'strong' }: BeamsProps) {
       beamsRef.current.forEach(drawBeam);
     }
 
-    window.addEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
     return () => {
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener("resize", onResize);
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
@@ -169,9 +170,21 @@ function BeamsBackground({ className, intensity = 'strong' }: BeamsProps) {
   }, [intensity]);
 
   return (
-    <div className={cn('relative min-h-[90vh] w-full overflow-hidden bg-neutral-950', className)}>
-      <canvas ref={canvasRef} className="absolute inset-0" style={{ filter: 'blur(8px)' }} />
-      <div className="absolute inset-0" style={{ backdropFilter: 'blur(10px)' }} />
+    <div
+      className={cn(
+        "relative min-h-[90vh] w-full overflow-hidden bg-gray-900",
+        className
+      )}
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0"
+        style={{ filter: "blur(8px)" }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{ backdropFilter: "blur(10px)" }}
+      />
     </div>
   );
 }
@@ -180,10 +193,10 @@ export default function Hero() {
   return (
     <section className="relative">
       <BeamsBackground intensity="strong" className="min-h-[90vh]" />
-      <div className="absolute inset-0 z-10 grid place-items-center">
-        <div className="px-6 text-center">
+      <div className="absolute inset-0 z-10 grid place-items-center px-4">
+        <div className="w-full max-w-4xl text-center">
           <motion.h1
-            className="whitespace-nowrap text-[clamp(28px,8vw,80px)] font-semibold tracking-tight text-white"
+            className="text-[clamp(24px,6vw,72px)] font-semibold tracking-tight text-white leading-tight"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -192,7 +205,7 @@ export default function Hero() {
           </motion.h1>
 
           <motion.p
-            className="mt-6 text-white/70 text-[clamp(14px,2.2vw,24px)]"
+            className="mt-4 sm:mt-6 text-gray-300 text-[clamp(14px,2vw,20px)] max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -200,15 +213,14 @@ export default function Hero() {
             Informatics Engineering Student at Jakarta State Polytechnic
           </motion.p>
 
-          {/* ⬇️ tombol dipindah ke hero, center di bawah subjudul */}
           <motion.div
-            className="mt-8 flex justify-center"
+            className="mt-6 sm:mt-8 flex justify-center"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <InteractiveHoverButton
-              href="/subjects"       // ganti ke anchor/route yang kamu mau
+              href="/subjects" // ganti ke anchor/route yang kamu mau
               size="lg"
               variant="light"
               className="mx-auto"

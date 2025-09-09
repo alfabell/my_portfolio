@@ -21,8 +21,7 @@ const EXPERIENCE: Item[] = [
     title: "Web Developer Intern",
     period: "Aug 2025 – Nov 2025",
     org: "Openlitera",
-    desc:
-      "Developed and implemented automation tools & data processing solutions.",
+    desc: "Developed and implemented automation tools & data processing solutions.",
   },
 ];
 
@@ -31,8 +30,7 @@ const EDUCATION: Item[] = [
     title: "Informatics and Computer Engineering",
     period: "2022 – Present",
     org: "Jakarta State Polytechnic",
-    desc:
-      "Department of Informatics Engineering, studying Computer Science.",
+    desc: "Department of Informatics Engineering, studying Computer Science.",
   },
   {
     title: "High School of Natural Science",
@@ -45,20 +43,16 @@ const EDUCATION: Item[] = [
 // Timeline list tanpa bullet
 function TimelineList({ items }: { items: Item[] }) {
   return (
-    <ul className="pl-0">
+    <ul className="pl-0 space-y-6 sm:space-y-8">
       {items.map((it, idx) => (
-        <li key={idx} className="pb-8 last:pb-0">
-          <h4 className="text-lg font-semibold text-[#34d399]">
+        <li key={idx} className="relative">
+          <h4 className="text-base sm:text-lg font-semibold text-emerald-500 leading-tight">
             {it.title}
           </h4>
-          <p className="mt-1 text-sm text-zinc-400">{it.period}</p>
-          <p className="mt-2 font-medium text-zinc-100 dark:text-white">
-            {it.org}
-          </p>
+          <p className="mt-1 text-xs sm:text-sm opacity-60">{it.period}</p>
+          <p className="mt-2 text-sm sm:text-base font-medium">{it.org}</p>
           {it.desc && (
-            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-              {it.desc}
-            </p>
+            <p className="mt-2 text-sm leading-relaxed opacity-70">{it.desc}</p>
           )}
         </li>
       ))}
@@ -68,32 +62,28 @@ function TimelineList({ items }: { items: Item[] }) {
 
 export default function SectionThreeResume() {
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-16">
+    <section className="px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-black/5 dark:bg-white/5">
       <div className="mx-auto max-w-7xl">
         {/* Judul Utama Resume */}
-        <h2 className="text-center text-4xl font-bold text-white mb-12">
+        <h2 className="text-center text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 sm:mb-12">
           Resume
         </h2>
 
-        <div className="grid gap-10 md:grid-cols-2">
+        <div className="grid gap-8 sm:gap-10 lg:grid-cols-2">
           {/* Experience */}
           <div>
-            <div className="flex items-center gap-3 mb-6">
-              <BriefcaseBusiness className="h-5 w-5 text-zinc-400" />
-              <h3 className="text-2xl font-semibold text-zinc-100">
-                Experience
-              </h3>
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <BriefcaseBusiness className="h-5 w-5 opacity-60 flex-shrink-0" />
+              <h3 className="text-xl sm:text-2xl font-semibold">Experience</h3>
             </div>
             <TimelineList items={EXPERIENCE} />
           </div>
 
           {/* Education */}
           <div>
-            <div className="flex items-center gap-3 mb-6">
-              <GraduationCap className="h-5 w-5 text-zinc-400" />
-              <h3 className="text-2xl font-semibold text-zinc-100">
-                Education
-              </h3>
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <GraduationCap className="h-5 w-5 opacity-60 flex-shrink-0" />
+              <h3 className="text-xl sm:text-2xl font-semibold">Education</h3>
             </div>
             <TimelineList items={EDUCATION} />
           </div>

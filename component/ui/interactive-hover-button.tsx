@@ -19,7 +19,8 @@ export function InteractiveHoverButton({
   size?: Size;
   className?: string;
 }) {
-  const cx = (...v: (string | undefined | false)[]) => v.filter(Boolean).join(" ");
+  const cx = (...v: (string | undefined | false)[]) =>
+    v.filter(Boolean).join(" ");
 
   const sizes: Record<Size, string> = {
     sm: "h-9 px-4 text-sm",
@@ -27,10 +28,11 @@ export function InteractiveHoverButton({
     lg: "h-12 px-7 text-base",
   };
 
-  // Tombol putih (light) = teks hitam; tombol gelap (dark) = teks putih
+  // Tombol light/dark dengan Tailwind standar
   const fills: Record<Variant, string> = {
-    dark: "bg-black text-white hover:bg-[#111111]",
-    light: "bg-white text-black hover:bg-[#EAEAEA]",
+    dark: "bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700",
+    light:
+      "bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100",
   };
 
   const glowRef = useRef<HTMLSpanElement>(null);
@@ -46,10 +48,10 @@ export function InteractiveHoverButton({
   // Glow kontras otomatis berdasarkan variant
   const isLight = variant === "light";
   const glowClass = isLight
-    // LIGHT: gelapkan di atas tombol putih (sedikit tint biru brand untuk karakter)
-    ? "mix-blend-multiply bg-[radial-gradient(circle_at_center,rgba(33,91,168,.22),transparent_70%)]"
-    // DARK: cerahkan di atas tombol gelap
-    : "mix-blend-screen bg-[radial-gradient(circle_at_center,rgba(255,255,255,.45),transparent_70%)]";
+    ? // LIGHT: gelapkan di atas tombol putih (sedikit tint biru brand untuk karakter)
+      "mix-blend-multiply bg-[radial-gradient(circle_at_center,rgba(33,91,168,.22),transparent_70%)]"
+    : // DARK: cerahkan di atas tombol gelap
+      "mix-blend-screen bg-[radial-gradient(circle_at_center,rgba(255,255,255,.45),transparent_70%)]";
 
   return (
     <Link
@@ -57,7 +59,7 @@ export function InteractiveHoverButton({
       onMouseMove={handleMove}
       className={cx(
         "group inline-flex rounded-full p-[2px] transition",
-        "bg-[linear-gradient(90deg,#7c3aed_0%,#06b6d4_50%,#22c55e_100%)]",
+        "bg-[linear-gradient(90deg,#374151_0%,#6b7280_50%,#9ca3af_100%)]",
         "hover:brightness-110 active:brightness-95",
         className
       )}

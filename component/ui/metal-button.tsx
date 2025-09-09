@@ -11,7 +11,7 @@ const base =
 
 const variantClass: Record<Variant, string> = {
   default:
-    "bg-gradient-to-b from-gray-100 to-gray-300 text-black shadow-md hover:from-gray-200 hover:to-gray-400",
+    "bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 text-gray-900 dark:text-white shadow-md hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-700",
   success:
     "bg-gradient-to-b from-emerald-400 to-emerald-600 text-white shadow-md hover:from-emerald-500 hover:to-emerald-700",
   destructive:
@@ -30,15 +30,16 @@ export interface MetalButtonProps
   size?: Size;
 }
 
-export const MetalButton = React.forwardRef<HTMLButtonElement, MetalButtonProps>(
-  ({ className, variant = "default", size = "default", ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        className={cn(base, variantClass[variant], sizeClass[size], className)}
-        {...props}
-      />
-    );
-  }
-);
+export const MetalButton = React.forwardRef<
+  HTMLButtonElement,
+  MetalButtonProps
+>(({ className, variant = "default", size = "default", ...props }, ref) => {
+  return (
+    <button
+      ref={ref}
+      className={cn(base, variantClass[variant], sizeClass[size], className)}
+      {...props}
+    />
+  );
+});
 MetalButton.displayName = "MetalButton";
