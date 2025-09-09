@@ -14,7 +14,7 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { label: "HOME", href: "/home" },
-  { label: "ABOUT", href: "/about" },
+  { label: "ABOUT ME", href: "/about me" },
   {
     label: "RESUME",
     href: "/resume",
@@ -37,7 +37,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 bg-[#32170d] text-white border-b border-white/10">
+    <header className="sticky top-0 z-50 bg-[#0A0909] text-white border-b border-white/10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <nav className="flex items-center justify-between gap-4">
           {/* brand */}

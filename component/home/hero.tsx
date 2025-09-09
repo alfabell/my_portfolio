@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion'; // <- pastikan sudah: pnpm add framer-motion
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { InteractiveHoverButton } from '@/component/ui/interactive-hover-button';
 
 type Intensity = 'subtle' | 'medium' | 'strong';
 
-interface AnimatedGradientBackgroundProps {
+interface BeamsProps {
   className?: string;
   intensity?: Intensity;
 }
@@ -24,30 +25,31 @@ interface Beam {
   pulseSpeed: number;
 }
 
-function createBeam(width: number, height: number): Beam {
+const CAP_DPR = 1.75;
+const TARGET_FPS = 48;
+const BASE_BEAMS = 12;
+
+function createBeam(w: number, h: number): Beam {
   const angle = -35 + Math.random() * 10;
   return {
-    x: Math.random() * width * 1.5 - width * 0.25,
-    y: Math.random() * height * 1.5 - height * 0.25,
+    x: Math.random() * w * 1.5 - w * 0.25,
+    y: Math.random() * h * 1.5 - h * 0.25,
     width: 30 + Math.random() * 60,
-    length: height * 2.5,
+    length: h * 2.2,
     angle,
-    speed: 0.6 + Math.random() * 1.2,
-    opacity: 0.12 + Math.random() * 0.16,
+    speed: 0.5 + Math.random() * 1.0,
+    opacity: 0.1 + Math.random() * 0.14,
     hue: 190 + Math.random() * 70,
     pulse: Math.random() * Math.PI * 2,
-    pulseSpeed: 0.02 + Math.random() * 0.03,
+    pulseSpeed: 0.015 + Math.random() * 0.02,
   };
 }
 
-function BeamsBackground({
-  className,
-  intensity = 'strong',
-}: AnimatedGradientBackgroundProps) {
+function BeamsBackground({ className, intensity = 'strong' }: BeamsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const beamsRef = useRef<Beam[]>([]);
-  const rafRef = useRef<number>(0);
-  const MINIMUM_BEAMS = 20;
+  const rafRef = useRef<number | null>(null);
+  const lastRef = useRef(0);
 
   const opacityMap: Record<Intensity, number> = {
     subtle: 0.7,
@@ -56,14 +58,17 @@ function BeamsBackground({
   };
 
   useEffect(() => {
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const updateCanvas = () => {
-      const dpr = window.devicePixelRatio || 1;
+    const setup = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, CAP_DPR);
       const w = window.innerWidth;
       const h = window.innerHeight;
 
@@ -71,61 +76,58 @@ function BeamsBackground({
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // hindari scale bertumpuk
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const totalBeams = Math.floor(MINIMUM_BEAMS * 1.5);
-      beamsRef.current = Array.from({ length: totalBeams }, () =>
-        createBeam(w, h),
-      );
+      const scale = (w * h) / (1280 * 720);
+      const total = Math.max(10, Math.min(28, Math.round(BASE_BEAMS * scale)));
+      beamsRef.current = Array.from({ length: total }, () => createBeam(w, h));
     };
 
-    const resetBeam = (beam: Beam, index: number, total: number) => {
-      const w = canvas.width / (window.devicePixelRatio || 1);
-      const h = canvas.height / (window.devicePixelRatio || 1);
-      const column = index % 3;
+    const resetBeam = (b: Beam, i: number, total: number) => {
+      const dpr = Math.min(window.devicePixelRatio || 1, CAP_DPR);
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+      const col = i % 3;
       const spacing = w / 3;
-
-      beam.y = h + 100;
-      beam.x =
-        column * spacing +
-        spacing / 2 +
-        (Math.random() - 0.5) * spacing * 0.5;
-      beam.width = 100 + Math.random() * 100;
-      beam.speed = 0.5 + Math.random() * 0.4;
-      beam.hue = 190 + (index * 70) / total;
-      beam.opacity = 0.2 + Math.random() * 0.1;
-      return beam;
+      b.y = h + 100;
+      b.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+      b.width = 80 + Math.random() * 90;
+      b.speed = 0.45 + Math.random() * 0.4;
+      b.hue = 190 + (i * 70) / total;
+      b.opacity = 0.16 + Math.random() * 0.08;
+      return b;
     };
 
-    const drawBeam = (beam: Beam) => {
+    const drawBeam = (b: Beam) => {
       ctx.save();
-      ctx.translate(beam.x, beam.y);
-      ctx.rotate((beam.angle * Math.PI) / 180);
+      ctx.translate(b.x, b.y);
+      ctx.rotate((b.angle * Math.PI) / 180);
 
-      const pulsingOpacity =
-        beam.opacity *
-        (0.8 + Math.sin(beam.pulse) * 0.2) *
-        opacityMap[intensity];
-
-      const grad = ctx.createLinearGradient(0, 0, 0, beam.length);
-      grad.addColorStop(0, `hsla(${beam.hue},85%,65%,0)`);
-      grad.addColorStop(0.1, `hsla(${beam.hue},85%,65%,${pulsingOpacity * 0.5})`);
-      grad.addColorStop(0.4, `hsla(${beam.hue},85%,65%,${pulsingOpacity})`);
-      grad.addColorStop(0.6, `hsla(${beam.hue},85%,65%,${pulsingOpacity})`);
-      grad.addColorStop(0.9, `hsla(${beam.hue},85%,65%,${pulsingOpacity * 0.5})`);
-      grad.addColorStop(1, `hsla(${beam.hue},85%,65%,0)`);
-
-      ctx.fillStyle = grad;
-      ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+      const alpha = b.opacity * (0.85 + Math.sin(b.pulse) * 0.15) * opacityMap[intensity];
+      const g = ctx.createLinearGradient(0, 0, 0, b.length);
+      g.addColorStop(0, `hsla(${b.hue},85%,65%,0)`);
+      g.addColorStop(0.12, `hsla(${b.hue},85%,65%,${alpha * 0.5})`);
+      g.addColorStop(0.45, `hsla(${b.hue},85%,65%,${alpha})`);
+      g.addColorStop(0.88, `hsla(${b.hue},85%,65%,${alpha * 0.4})`);
+      g.addColorStop(1, `hsla(${b.hue},85%,65%,0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(-b.width / 2, 0, b.width, b.length);
       ctx.restore();
     };
 
-    const animate = () => {
-      const w = canvas.width / (window.devicePixelRatio || 1);
-      const h = canvas.height / (window.devicePixelRatio || 1);
+    const animate = (ts: number) => {
+      if (ts - lastRef.current < 1000 / TARGET_FPS) {
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastRef.current = ts;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, CAP_DPR);
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
 
       ctx.clearRect(0, 0, w, h);
-      ctx.filter = 'blur(35px)';
+      ctx.filter = 'blur(18px)';
 
       const total = beamsRef.current.length;
       for (let i = 0; i < total; i++) {
@@ -135,30 +137,41 @@ function BeamsBackground({
         if (b.y + b.length < -100) resetBeam(b, i, total);
         drawBeam(b);
       }
-
       rafRef.current = requestAnimationFrame(animate);
     };
 
-    updateCanvas();
-    animate();
-    window.addEventListener('resize', updateCanvas);
+    const onResize = () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      setup();
+      rafRef.current = requestAnimationFrame(animate);
+    };
 
+    setup();
+
+    if (!prefersReduced) {
+      rafRef.current = requestAnimationFrame(animate);
+    } else {
+      const dpr = Math.min(window.devicePixelRatio || 1, CAP_DPR);
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+      ctx.clearRect(0, 0, w, h);
+      beamsRef.current.forEach(drawBeam);
+    }
+
+    window.addEventListener('resize', onResize);
     return () => {
-      window.removeEventListener('resize', updateCanvas);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', onResize);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
   }, [intensity]);
 
   return (
-    <div className={cn('relative min-h-[80vh] w-full overflow-hidden bg-neutral-950', className)}>
-      <canvas ref={canvasRef} className="absolute inset-0" style={{ filter: 'blur(15px)' }} />
-      <motion.div
-        className="absolute inset-0 bg-neutral-950/5"
-        animate={{ opacity: [0.05, 0.15, 0.05] }}
-        transition={{ duration: 10, ease: 'easeInOut', repeat: Infinity }}
-        style={{ backdropFilter: 'blur(50px)' }}
-      />
-      {/** children/overlay ditaruh di luar komponen ini di bawah */}
+    <div className={cn('relative min-h-[90vh] w-full overflow-hidden bg-neutral-950', className)}>
+      <canvas ref={canvasRef} className="absolute inset-0" style={{ filter: 'blur(8px)' }} />
+      <div className="absolute inset-0" style={{ backdropFilter: 'blur(10px)' }} />
     </div>
   );
 }
@@ -167,25 +180,42 @@ export default function Hero() {
   return (
     <section className="relative">
       <BeamsBackground intensity="strong" className="min-h-[90vh]" />
-      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-        <div className="pointer-events-auto mx-auto max-w-4xl px-6 text-center">
+      <div className="absolute inset-0 z-10 grid place-items-center">
+        <div className="px-6 text-center">
           <motion.h1
-            className="text-5xl font-semibold tracking-tighter text-white md:text-7xl lg:text-8xl"
+            className="whitespace-nowrap text-[clamp(28px,8vw,80px)] font-semibold tracking-tight text-white"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.6 }}
           >
-            Hi, Welcome to My Website!
+            Hi, I am Muhamad Alfabel
           </motion.h1>
 
           <motion.p
-            className="mt-6 text-lg text-white/70 md:text-2xl"
+            className="mt-6 text-white/70 text-[clamp(14px,2.2vw,24px)]"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Built with Next.js & Tailwind — smooth beams background like 21st.dev ✨
+            Informatics Engineering Student at Jakarta State Polytechnic
           </motion.p>
+
+          {/* ⬇️ tombol dipindah ke hero, center di bawah subjudul */}
+          <motion.div
+            className="mt-8 flex justify-center"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <InteractiveHoverButton
+              href="/subjects"       // ganti ke anchor/route yang kamu mau
+              size="lg"
+              variant="light"
+              className="mx-auto"
+            >
+              <span className="font-semibold">Learn More</span>
+            </InteractiveHoverButton>
+          </motion.div>
         </div>
       </div>
     </section>

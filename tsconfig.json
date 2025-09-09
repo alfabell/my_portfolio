@@ -1,24 +1,54 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "noEmit": true,
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],               // <- penting
-      "@component/*": ["./component/*"], // opsional, biar bisa pakai @component/...
-      "@app/*": ["./app/*"],
-      "@lib/*": ["./lib/*"],
-      "@public/*": ["./public/*"]
+      "@/*": [
+        "./*"
+      ], // <- penting
+      "@component/*": [
+        "./component/*"
+      ], // opsional, biar bisa pakai @component/...
+      "@app/*": [
+        "./app/*"
+      ],
+      "@lib/*": [
+        "./lib/*"
+      ],
+      "@public/*": [
+        "./public/*"
+      ]
     },
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
